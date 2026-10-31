@@ -26,8 +26,17 @@ function formatTime(seconds: number): string {
 }
 
 export function GlobalBottomPlayer({
-  whatsAppPhone = '521234567890',
+  whatsAppPhone: defaultPhone = '521234567890',
 }: GlobalBottomPlayerProps) {
+  const [phone, setPhone] = React.useState(defaultPhone);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('beatmakerplace_whatsapp');
+      if (saved) setPhone(saved);
+    }
+  }, []);
+
   const {
     currentBeat,
     isPlaying,
@@ -47,7 +56,7 @@ export function GlobalBottomPlayer({
   if (!currentBeat) return null;
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
-  const whatsAppLink = generateWhatsAppLink(whatsAppPhone, currentBeat, 'Standard');
+  const whatsAppLink = generateWhatsAppLink(phone, currentBeat, 'Standard');
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPercent = parseFloat(e.target.value);

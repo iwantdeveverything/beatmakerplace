@@ -1,15 +1,32 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Beat } from '../modules/beats/domain/beat.entity';
+import { getBeatRepository } from '../modules/beats/infrastructure/beat-repository.factory';
 import { INITIAL_BEATS } from '../modules/beats/infrastructure/mock-beats.data';
 import { HeroSection } from '../components/HeroSection';
 import { BeatCard } from '../components/BeatCard';
 import { Sparkles, Music2, RefreshCw } from 'lucide-react';
 
 export default function HomePage() {
-  const [beats] = useState(INITIAL_BEATS);
+  const [beats, setBeats] = useState<Beat[]>(INITIAL_BEATS);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('Todos');
+  const [whatsAppPhone, setWhatsAppPhone] = useState('521234567890');
+
+  useEffect(() => {
+    const repository = getBeatRepository();
+    repository.getAll().then((data) => {
+      if (data && data.length > 0) {
+        setBeats(data);
+      }
+    });
+
+    if (typeof window !== 'undefined') {
+      const savedPhone = localStorage.getItem('beatmakerplace_whatsapp');
+      if (savedPhone) setWhatsAppPhone(savedPhone);
+    }
+  }, []);
 
   const availableGenres = useMemo(() => {
     const genres = Array.from(new Set(beats.map((b) => b.genre)));
@@ -80,6 +97,7 @@ export default function HomePage() {
                 key={beat.id}
                 beat={beat}
                 playlist={filteredBeats}
+                whatsAppPhone={whatsAppPhone}
               />
             ))}
           </div>
